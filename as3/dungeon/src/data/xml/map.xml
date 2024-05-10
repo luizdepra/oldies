@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+	<generator>
+		<max_tentatives>1000</max_tentatives>
+		<room>
+			<max_size>15</max_size>
+			<min_size>8</min_size>
+			<chance>90</chance>
+			<extra_chance>90</extra_chance>
+		</room>
+	</generator>
+	<map>
+		<tile_size>64</tile_size>
+	</map>
+</data>

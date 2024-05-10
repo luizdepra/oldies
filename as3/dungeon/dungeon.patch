@@ -1,0 +1,478 @@
+Index: src/data/xml/map.xml
+===================================================================
+--- src/data/xml/map.xml	(revision 1)
++++ src/data/xml/map.xml	(working copy)
+@@ -1,4 +1,12 @@
+ <?xml version="1.0" encoding="utf-8" ?>
+ <data>
+-
++	<generator>
++		<max_tentatives>1000</max_tentatives>
++		<room>
++			<max_size>15</max_size>
++			<min_size>8</min_size>
++			<chance>90</chance>
++			<extra_chance>90</extra_chance>
++		</room>
++	</generator>
+ </data>
+\ No newline at end of file
+Index: src/generator/DungeonGenerator.as
+===================================================================
+--- src/generator/DungeonGenerator.as	(revision 1)
++++ src/generator/DungeonGenerator.as	(working copy)
+@@ -1,56 +1,38 @@
+ package generator 
+ {
+-	import flash.display.Sprite;
+-	import flash.events.MouseEvent;
+-	import flash.geom.Point;
+-	import flash.text.TextField;
+ 	import map.Map;
++	import map.Room;
+ 	import map.Tile;
++	import org.flixel.*;
+ 	/**
+-	 * ...
++	 * DungeonGenerator - Generate random dungeons
+ 	 * @author Luiz F. A. de Prá
+ 	 */
+ 	public class DungeonGenerator
+ 	{
+-		//Constants
+-		private const ROOM_CHANCE:int				= 90;
+-		private const ROOM_EXTRA_CHANCE:int			= 90;
+-		private const MAX_TENTATIVES:int			= 1000;
+-		
+-		private const MAX_ROOM_SIZE:int				= 15;
+-		private const MIN_ROOM_SIZE:int				= 8;
+-		
+-		private const MAX_EXTRA_CONNECTIONS:int		= 1;
+-		
+-		private const DIRECTION_NORTH:int			= 0;
+-		private const DIRECTION_SOUTH:int			= 1;
+-		private const DIRECTION_WEST:int			= 2;
+-		private const DIRECTION_EAST:int			= 3;
+-		
+ 		private var cMap:Map;
+ 		
+-		private var vRooms:Vector.<Room>;
+-		private var cActualRoom:Room;
++		private var cCurrentRoom:Room;
+ 		
+-		private var iNumObjects:int;
++		private var iNumRooms:int;
+ 		
+ 		public function DungeonGenerator() 
+ 		{
+ 		}
+ 		
+-		public function generate(width:int, height:int, nobj:int):Map
++		public function generate(width:int, height:int, nrooms:int):Map
+ 		{
+ 			cMap = new Map(width, height);
+-			vRooms = new Vector.<Room>();
+-			iNumObjects = 0;
++			iNumRooms = 0;
+ 			
+ 			// STEP 1: Fill the whole map with solid earth
+-			fillMap();
++			// not needed anymore
+ 			
+ 			// STEP 2: Dig out a single room in (the centre of?) the map
+-			var initPnt:Point = new Point(int(cMap.width / 2), int(cMap.height / 2));
++			var initPnt:FlxPoint = new FlxPoint(int(cMap.width / 2), int(cMap.height / 2));
++			var room:Room = new Room(initPnt, Global.
+ 			
+-			makeRoom(initPnt, MAX_ROOM_SIZE, MAX_ROOM_SIZE, Global.getRandom(DIRECTION_NORTH, DIRECTION_EAST));
++			cMap.addRoom(room);
+ 			
+ 			iNumObjects++;
+ 			
+@@ -1133,13 +1115,6 @@
+ 			return baseSprite;
+ 		}
+ 		
+-		private function fillMap():void 
+-		{
+-			for (var i:int = 0; i < cMap.width; i++)
+-				for (var j:int = 0; j < cMap.height; j++)
+-					cMap.getTile(i,j).type = Tile.TILETYPE_EMPTY;
+-		}
+-		
+ 		public function traceMap():void
+ 		{
+ 			for (var j:int = 0; j < cMap.height; j++)
+Index: src/generator/Room.as
+===================================================================
+--- src/generator/Room.as	(revision 1)
++++ src/generator/Room.as	(working copy)
+@@ -1,28 +0,0 @@
+-package generator 
+-{
+-	import flash.geom.Point;
+-	/**
+-	 * ...
+-	 * @author Luiz F. A. de Prá
+-	 */
+-	public class Room
+-	{
+-		public static const TYPE_CORRIDOR:int			= 0;
+-		public static const TYPE_SQUARE_ROOM:int		= 1;
+-		
+-		public var initialPoint:Point;
+-		public var width:int;
+-		public var height:int;
+-		public var type:int;
+-		
+-		public function Room(pnt:Point, wd:int, hg:int, tp:int) 
+-		{
+-			initialPoint = pnt;
+-			width = wd;
+-			height = hg;
+-			type = tp;
+-		}
+-		
+-	}
+-
+-}
+\ No newline at end of file
+Index: src/Global.as
+===================================================================
+--- src/Global.as	(revision 1)
++++ src/Global.as	(working copy)
+@@ -16,6 +16,7 @@
+ 		
+ 		// XMLs
+ 		public static var configXML:XML;
++		public static var mapXML:XML;
+ 		
+ 		public static function getRandom(min:int, max:int):int
+ 		{
+Index: src/managers/MapManager.as
+===================================================================
+--- src/managers/MapManager.as	(revision 0)
++++ src/managers/MapManager.as	(revision 0)
+@@ -0,0 +1,78 @@
++package map
++{
++	import entities.Entity;
++	import entities.Player;
++	import flash.geom.Point;
++	import org.flixel.*;
++	
++	/**
++	 * ...
++	 * @author Tiago Ling Alexandre / Luiz Francisco Artigas de Prá
++	 */
++	public class MapManager extends FlxGroup
++	{	
++		private var cTilesetImg:Class;
++		
++		private var cMap:Map;
++		private var vMovableEntities:Vector.<Entity>;
++		private var cPlayer:Player;
++		
++		private var cTileMap:FlxTilemap;
++			
++		public function MapManager(map:Map, tileset:Class):void
++		{			
++			cMap = map;
++			cTilesetImg = tileset;
++			
++			cTileMap = new FlxTilemap();
++			cTileMap.loadMap(cMap.toCSV(), cTilesetImg, 64, 64);
++			
++			vMovableEntities = new Vector.<Entity>();
++			cPlayer = null;
++			
++			add(cTileMap);
++		}
++		
++		override public function update():void
++		{	
++			super.update();
++		}
++		
++		public function attachPlayer(player:Player):void
++		{
++			cPlayer = player;
++			add(player);
++			
++			var pnt:Point = cMap.getPlayerStart();
++			if (!pnt)
++				trace("Erro: PlayerStart não foi definido!");
++			
++			cPlayer.setPosition(pnt.x,pnt.y);
++		}
++		
++		public function attachMovableEntity(entity:Entity):void
++		{
++			vMovableEntities.push(entity);
++			add(entity);
++		}
++		
++		public function depthSort():void
++		{
++			//grpObjects.members.sort(heightSort);
++		}
++		
++		private function heightSort(a_thing:FlxObject, b_thing:FlxObject):Number
++		{
++			var a_height:Number = a_thing.y * 500 + a_thing.x;
++			var b_height:Number = b_thing.y * 500 + b_thing.x;
++			
++			if (a_height > b_height)
++				return 1;
++			else if (a_height < b_height)
++				return -1;
++			else
++				return 0;
++		}
++	}
++
++}
+\ No newline at end of file
+Index: src/map/Direction.as
+===================================================================
+--- src/map/Direction.as	(revision 0)
++++ src/map/Direction.as	(revision 0)
+@@ -0,0 +1,15 @@
++package map 
++{
++	/**
++	 * Direction - Direction enumerations
++	 * @author Luiz F. A. de Prá
++	 */
++	public class Direction 
++	{
++		public static const NORTH:int			= 0;
++		public static const SOUTH:int			= 1;
++		public static const WEST:int			= 2;
++		public static const EAST:int			= 3;
++	}
++
++}
+\ No newline at end of file
+Index: src/map/Map.as
+===================================================================
+--- src/map/Map.as	(revision 1)
++++ src/map/Map.as	(working copy)
+@@ -9,7 +9,7 @@
+ 	public class Map
+ 	{
+ 		// vector of tiles
+-		private var vTiles:Vector.<Vector.<Tile>>;
++		private var vRooms:Vector.<Room>;
+ 		
+ 		// dimensions
+ 		private var iWidth:int;
+@@ -23,15 +23,17 @@
+ 			iWidth = width;
+ 			iHeight = height;
+ 			
+-			vTiles = new Vector.<Vector.<Tile>>();
+-			for (var i:int = 0; i < iWidth; i++)
+-			{
+-				vTiles.push(new Vector.<Tile>());
++			vRooms = new Vector.<Room>();			
++		}
+ 				
+-				for (var j:int = 0; j < iHeight; j++)
+-					vTiles[i].push(new Tile());
+-			}
++		public function addRoom(room:Room):Boolean
++		{
++			if (checkRoomCollision(room))
++				return false;
+ 			
++			vRooms.push(room);
++				
++			return true;
+ 		}
+ 		
+ 		public function toCSV():String
+@@ -51,46 +53,22 @@
+ 			return str;
+ 		}
+ 		
+-		public function getTile(x:int, y:int):Tile
++		private function checkRoomCollision(newRoom:Room):Boolean
+ 		{
+-			return vTiles[x][y];
++			for each (var room:Room in vRooms)
++			{
++				if (newRoom.bottom < room.top)
++					return true;
++				if (newRoom.top > room.bottom)
++					return true;
++				if (newRoom.right < room.left)
++					return true;
++				if (newRoom.left > room.right)
++					return true;
++			}
++			
++			return false;
+ 		}
+-		
+-		public function setTile(x:int, y:int, tile:Tile):void
+-		{
+-			vTiles[x][y] = tile;
+-		}
+-		
+-		public function get width():int
+-		{
+-			return iWidth;
+-		}
+-		
+-		public function set width(value:int):void
+-		{
+-			iWidth = value;
+-		}
+-		
+-		public function get height():int
+-		{
+-			return iHeight;
+-		}
+-		
+-		public function set height(value:int):void
+-		{
+-			iHeight = value;
+-		}
+-		
+-		public function getPlayerStart():Point
+-		{
+-			return pPlayerStart;
+-		}
+-		
+-		public function setPlayerStart(pnt:Point):void
+-		{
+-			pPlayerStart = pnt;
+-		}
+-		
+ 	}
+ 
+ }
+\ No newline at end of file
+Index: src/map/MapManager.as
+===================================================================
+--- src/map/MapManager.as	(revision 1)
++++ src/map/MapManager.as	(working copy)
+@@ -1,78 +0,0 @@
+-package map
+-{
+-	import entities.Entity;
+-	import entities.Player;
+-	import flash.geom.Point;
+-	import org.flixel.*;
+-	
+-	/**
+-	 * ...
+-	 * @author Tiago Ling Alexandre / Luiz Francisco Artigas de Prá
+-	 */
+-	public class MapManager extends FlxGroup
+-	{	
+-		private var cTilesetImg:Class;
+-		
+-		private var cMap:Map;
+-		private var vMovableEntities:Vector.<Entity>;
+-		private var cPlayer:Player;
+-		
+-		private var cTileMap:FlxTilemap;
+-			
+-		public function MapManager(map:Map, tileset:Class):void
+-		{			
+-			cMap = map;
+-			cTilesetImg = tileset;
+-			
+-			cTileMap = new FlxTilemap();
+-			cTileMap.loadMap(cMap.toCSV(), cTilesetImg, 64, 64);
+-			
+-			vMovableEntities = new Vector.<Entity>();
+-			cPlayer = null;
+-			
+-			add(cTileMap);
+-		}
+-		
+-		override public function update():void
+-		{	
+-			super.update();
+-		}
+-		
+-		public function attachPlayer(player:Player):void
+-		{
+-			cPlayer = player;
+-			add(player);
+-			
+-			var pnt:Point = cMap.getPlayerStart();
+-			if (!pnt)
+-				trace("Erro: PlayerStart não foi definido!");
+-			
+-			cPlayer.setPosition(pnt.x,pnt.y);
+-		}
+-		
+-		public function attachMovableEntity(entity:Entity):void
+-		{
+-			vMovableEntities.push(entity);
+-			add(entity);
+-		}
+-		
+-		public function depthSort():void
+-		{
+-			//grpObjects.members.sort(heightSort);
+-		}
+-		
+-		private function heightSort(a_thing:FlxObject, b_thing:FlxObject):Number
+-		{
+-			var a_height:Number = a_thing.y * 500 + a_thing.x;
+-			var b_height:Number = b_thing.y * 500 + b_thing.x;
+-			
+-			if (a_height > b_height)
+-				return 1;
+-			else if (a_height < b_height)
+-				return -1;
+-			else
+-				return 0;
+-		}
+-	}
+-
+-}
+\ No newline at end of file
+Index: src/map/Room.as
+===================================================================
+--- src/map/Room.as	(revision 0)
++++ src/map/Room.as	(revision 0)
+@@ -0,0 +1,32 @@
++package map 
++{
++	import org.flixel.*;
++	/**
++	 * Room - Room informations
++	 * @author Luiz F. A. de Prá
++	 */
++	public class Room extends FlxRect
++	{
++		public static const TYPE_CORRIDOR:int			= 0;
++		public static const TYPE_SQUARE_ROOM:int		= 1;
++		
++		public var type:int;
++		
++		private var vMapEntities:Vector.<int>;;
++		
++		public function Room(point:FlxPoint, width:int, height:int, type:int) 
++		{
++			super(point.x, point.y, width, height);
++			this.type = type;
++			
++			vMapEntities = new Vector.<int>();
++		}
++		
++		public function release():void
++		{
++			vMapEntities = null;
++		}
++		
++	}
++
++}
+\ No newline at end of file

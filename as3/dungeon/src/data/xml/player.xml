@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+	<player>
+		<id>1</id>
+		<name>Player</name>
+		<race>Human</race>
+		<classe>Warrior</classe>
+		<sprite>player.png</sprite>
+	</player>
+</data>

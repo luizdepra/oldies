@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+	<monster>
+		<id>1</id>
+		<name>Orc</name>
+		<sprite>orc.png</sprite>
+	</monster>
+	
+	<monster>
+		<id>2</id>
+		<name>Troll</name>
+		<sprite>troll.png</sprite>
+	</monster>
+	
+	<monster>
+		<id>3</id>
+		<name>Zombie</name>
+		<sprite>zombie.png</sprite>
+	</monster>
+</data>

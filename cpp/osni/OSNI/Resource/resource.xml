@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <sprite name="menu_background">
+        <image file="menu_background.png" />
+    </sprite>
+    <sprite name="background">
+        <image file="background.png" />
+    </sprite>
+    <sprite name="ship01">
+        <image file="ship01.png" />
+    </sprite>
+    <sprite name="ship02">
+        <image file="ship02.png" />
+    </sprite>
+    <sprite name="laser">
+        <image file="laser.png" />
+    </sprite>
+    <sprite name="missile">
+        <image file="missile.png" />
+    </sprite>
+    <sprite name="flare">
+        <image file="flare.png" />
+    </sprite>
+    <sprite name="asteroid">
+        <image file="asteroid.png" />
+    </sprite>
+    <sprite name="explosion">
+        <image file="explosion.png">
+            <grid size="32,32" array="4,1" />
+        </image>
+        <animation speed="50" pingpong="yes" loop="no" />
+    </sprite>
+</resources>
