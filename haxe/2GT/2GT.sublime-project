@@ -1,0 +1,25 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"name": "2GT",
+			"path": "E:/Development/Projects/Haxe/2GT"
+		},
+		{
+			"follow_symlinks": true,
+			"name": "Flixel",
+			"path": "E:/Development/HaxeToolkit/haxe/lime/flixel/3,3,4/"
+		},
+		{
+			"follow_symlinks": true,
+			"name": "Flixel Addons",
+			"path": "E:/Development/HaxeToolkit/haxe/lime/flixel-addons/1,1,0/"
+		},
+		{
+			"follow_symlinks": true,
+			"name": "Haxe",
+			"path": "E:/Development/HaxeToolkit/haxe/std"
+		}
+	]
+}
